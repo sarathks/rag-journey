@@ -7,33 +7,26 @@
 
 ## The Big Picture
 
-As a UI developer, you already understand the full stack:
+RAG connects your application to an LLM in a smart way — instead of the LLM guessing, it reads the right documents and answers based on them.
 
 ```
-Frontend → API → Backend → Data
+Your App
+  ↓ Question
+  ↓ Vector Search → Relevant Chunks
+  ↓ LLM
+  ↓ Answer
 ```
 
-We're just extending it:
+Eventually the full stack looks like:
 
 ```
-Angular → API → RAG → Vector DB
-                 │
-              LLM + Embeddings
-```
-
-Eventually:
-
-```
-Angular
+App
   ↓ FastAPI
-  ↓ LangGraph
   ↓ LangChain
   ↓ Retriever
   ↓ Vector DB
   ↓ LLM
 ```
-
-No ML research. Just extending what you already know.
 
 ---
 
