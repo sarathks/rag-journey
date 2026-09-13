@@ -496,7 +496,48 @@ chunk 2: "trained on large datasets from the web..."</pre>
       <div class="step-chevron">▼</div>
     </div>
     <div class="step-body">
-      <div class="coming-soon">Coming soon — Question → Embedding → Vector search → Chunks → LLM → Answer</div>
+      <div class="concept">
+        <h3>The Full Flow</h3>
+<pre>Question
+  ↓ embed the question
+  ↓ search vector DB
+  ↓ get top-K relevant chunks
+  ↓ build a prompt: chunks + question
+  ↓ send to LLM
+  ↓ Answer</pre>
+        <p>Every step you've learned so far comes together here.</p>
+      </div>
+      <div class="concept">
+        <h3>Step by step</h3>
+        <p><strong>1. Embed the question</strong><br>The user asks: "What is cosine similarity?" You pass that through the same embedding model used to index your documents. You get back a vector.</p>
+        <p><strong>2. Search the vector DB</strong><br>You query the vector DB with that vector. It returns the top-K chunks whose embeddings are closest to the question's embedding.</p>
+        <p><strong>3. Build the prompt</strong></p>
+<pre>You are a helpful assistant. Use the context below to answer the question.
+
+Context:
+---
+[chunk 1 text]
+---
+[chunk 2 text]
+---
+Question: What is cosine similarity?
+Answer:</pre>
+        <p><strong>4. Send to LLM</strong><br>The LLM reads the context + question and generates an answer grounded in your documents — not from its training data.</p>
+      </div>
+      <div class="concept">
+        <h3>Why the prompt structure matters</h3>
+        <p>The LLM only knows what you tell it in the prompt. If the retrieved chunks are relevant, the answer will be good. If they're not, the answer will be off. Retrieval quality is the most important part of RAG.</p>
+      </div>
+      <div class="concept">
+        <h3>What can go wrong</h3>
+        <ul>
+          <li>Wrong chunks retrieved → bad answer</li>
+          <li>Chunks too large → LLM gets overwhelmed</li>
+          <li>No relevant chunks exist → LLM hallucinates</li>
+          <li>Poor prompt structure → LLM ignores the context</li>
+        </ul>
+        <p>All of these are tunable — that's what Step 6 is about.</p>
+      </div>
     </div>
   </div>
 
@@ -508,7 +549,54 @@ chunk 2: "trained on large datasets from the web..."</pre>
       <div class="step-chevron">▼</div>
     </div>
     <div class="step-body">
-      <div class="coming-soon">Coming soon — chunk size, overlap, top-k tuning, metadata filtering, prompt design, citations</div>
+      <div class="concept">
+        <h3>Chunk size</h3>
+        <p>Too small: the chunk doesn't have enough context to be useful on its own. Too large: the embedding is vague, retrieval is less precise, and you waste LLM tokens.</p>
+        <p>Start with 500 characters, test, adjust. There's no universal answer.</p>
+      </div>
+      <div class="concept">
+        <h3>Overlap</h3>
+        <p>Prevents information from falling through the cracks at chunk boundaries. Typically 10–15% of chunk size. If your chunk size is 500, set overlap to 50–75.</p>
+      </div>
+      <div class="concept">
+        <h3>Top-K tuning</h3>
+        <ul>
+          <li><code>top_k=1</code> → very focused, but risky if the best chunk was missed</li>
+          <li><code>top_k=5</code> → more context, but uses more tokens and can dilute the answer</li>
+          <li><code>top_k=3</code> → a safe starting point for most cases</li>
+        </ul>
+      </div>
+      <div class="concept">
+        <h3>Metadata filtering</h3>
+        <p>Instead of searching your entire vector DB, pre-filter by metadata before doing similarity search.</p>
+        <p>Example: if your DB has docs from 10 different topics and the user asks about "security", filter to only chunks tagged <code>topic: security</code> first. Faster and more accurate.</p>
+      </div>
+      <div class="concept">
+        <h3>Prompt design</h3>
+        <p>Good prompt habits:</p>
+        <ul>
+          <li>Tell the LLM explicitly to use the provided context</li>
+          <li>Tell it what to do if the answer isn't in the context ("say I don't know, don't guess")</li>
+          <li>Keep the format consistent</li>
+        </ul>
+<pre>Answer the question using only the context provided.
+If the answer is not in the context, say "I don't have enough information."
+
+Context:
+[chunks]
+
+Question: [user question]</pre>
+      </div>
+      <div class="concept">
+        <h3>Hallucination mitigation</h3>
+        <p>Even with RAG, hallucination can happen if the retrieved chunks don't contain the answer or the LLM blends context with its training data. Instruct the LLM to only use the provided context and to admit when it doesn't know.</p>
+      </div>
+      <div class="concept">
+        <h3>Citations</h3>
+        <p>Instead of just returning an answer, return the source chunk too. This lets users verify and builds trust.</p>
+<pre>Answer: Cosine similarity measures the angle between two vectors.
+Source: embeddings_guide.pdf, page 4</pre>
+      </div>
     </div>
   </div>
 
@@ -520,7 +608,63 @@ chunk 2: "trained on large datasets from the web..."</pre>
       <div class="step-chevron">▼</div>
     </div>
     <div class="step-body">
-      <div class="coming-soon">Coming soon — put your own notes in, ask questions, get answers from your own documents</div>
+      <div class="concept">
+        <h3>The idea</h3>
+        <p>Take your own notes — markdown files, text files, PDFs — put them into a vector DB, and ask questions to get answers from your own documents.</p>
+<pre>your_notes/
+  rag_notes.md
+  llm_basics.txt
+        ↓
+  index all documents
+        ↓
+  vector DB with all your knowledge
+        ↓
+  ask: "explain cosine similarity"
+        ↓
+  answer from your own notes</pre>
+      </div>
+      <div class="concept">
+        <h3>Code structure</h3>
+<pre>ask-my-notes/
+  ingest.py   ← reads docs, chunks, embeds, stores in vector DB
+  query.py    ← takes a question, retrieves chunks, calls LLM
+  app.py      ← simple CLI or API interface</pre>
+      </div>
+      <div class="concept">
+        <h3>Tools</h3>
+        <table class="compare-table">
+          <thead><tr><th>Task</th><th>Tool</th></tr></thead>
+          <tbody>
+            <tr><td>Embedding</td><td><code>sentence-transformers</code> or OpenAI API</td></tr>
+            <tr><td>Vector DB</td><td>ChromaDB (local, no setup)</td></tr>
+            <tr><td>LLM</td><td>OpenAI API or Ollama (local)</td></tr>
+            <tr><td>PDF parsing</td><td><code>pdfplumber</code></td></tr>
+            <tr><td>Chunking</td><td>manual or <code>langchain.text_splitter</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="concept">
+        <h3>ChromaDB — why it's great for this</h3>
+        <p>ChromaDB runs completely locally — no server, no account, no cost. Just <code>pip install chromadb</code> and start storing vectors. Perfect for a learning project.</p>
+      </div>
+      <div class="concept">
+        <h3>What you'll learn by building this</h3>
+        <ul>
+          <li>How all 6 steps connect in a real system</li>
+          <li>How retrieval quality affects answer quality</li>
+          <li>How to debug when answers are wrong (check what chunks were retrieved)</li>
+          <li>The full RAG loop end to end</li>
+        </ul>
+      </div>
+      <div class="concept">
+        <h3>Extending it</h3>
+        <ul>
+          <li>Add a web UI (HTML form + FastAPI backend)</li>
+          <li>Add metadata to filter by document name</li>
+          <li>Add citations to show which note the answer came from</li>
+          <li>Swap in different LLMs and compare results</li>
+        </ul>
+      </div>
     </div>
   </div>
 

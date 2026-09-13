@@ -342,19 +342,251 @@ The output is always the same: a big string of text you then chunk.
 
 ## Step 5 — First RAG App 🎉
 
-**Status:** 🔲 Not started
+**Status:** ✅ Done
+
+### Concepts
+
+**The full flow**
+
+```
+Question
+  ↓ embed the question
+  ↓ search vector DB
+  ↓ get top-K relevant chunks
+  ↓ build a prompt: chunks + question
+  ↓ send to LLM
+  ↓ Answer
+```
+
+This is RAG. Every step you've learned so far comes together here.
+
+---
+
+**Step by step**
+
+**1. Embed the question**
+
+The user asks: *"What is cosine similarity?"*
+
+You pass that question through the same embedding model you used to index your documents. You get back a vector.
+
+**2. Search the vector DB**
+
+You query your vector DB with that vector. It returns the top-K chunks whose embeddings are closest to the question's embedding.
+
+**3. Build the prompt**
+
+You don't just send the question to the LLM. You build a prompt like this:
+
+```
+You are a helpful assistant. Use the context below to answer the question.
+
+Context:
+---
+[chunk 1 text]
+---
+[chunk 2 text]
+---
+[chunk 3 text]
+---
+
+Question: What is cosine similarity?
+Answer:
+```
+
+**4. Send to LLM**
+
+The LLM reads the context + question and generates an answer grounded in your documents — not from its training data.
+
+---
+
+**Why the prompt structure matters**
+
+The LLM only knows what you tell it in the prompt. If the chunks you retrieved are relevant, the answer will be good. If they're not, the answer will be off. This is why retrieval quality is the most important part of RAG.
+
+---
+
+**What can go wrong**
+
+- Wrong chunks retrieved → bad answer
+- Chunks too large → LLM gets overwhelmed
+- No relevant chunks exist → LLM hallucinates
+- Poor prompt structure → LLM ignores the context
+
+All of these are tunable — that's what Step 6 is about.
 
 ---
 
 ## Step 6 — Improve RAG
 
-**Status:** 🔲 Not started
+**Status:** ✅ Done
+
+### Concepts
+
+**Why RAG needs tuning**
+
+A basic RAG works. A well-tuned RAG works well. The difference is in these variables — chunk size, overlap, top-K, metadata, prompt design, and how you handle edge cases.
+
+---
+
+**Chunk size**
+
+Too small: the chunk doesn't have enough context to be useful on its own.
+Too large: the embedding is vague, retrieval is less precise, and you waste LLM tokens.
+
+Start with 500 characters, test, adjust. There's no universal answer.
+
+---
+
+**Overlap**
+
+Prevents information from falling through the cracks at chunk boundaries. Typically 10–15% of chunk size.
+
+If your chunk size is 500, set overlap to 50–75.
+
+---
+
+**Top-K**
+
+How many chunks you retrieve and send to the LLM.
+
+- `top_k=1` → very focused, but risky if the best chunk was missed
+- `top_k=5` → more context, but uses more tokens and can dilute the answer
+- `top_k=3` → a safe starting point for most cases
+
+---
+
+**Metadata filtering**
+
+Instead of searching your entire vector DB, you can pre-filter by metadata before doing similarity search.
+
+Example: if your DB has docs from 10 different topics and the user is asking about "security", you can filter to only chunks tagged `topic: security` before running the vector search.
+
+This makes retrieval faster and more accurate.
+
+---
+
+**Prompt design**
+
+The prompt is where you control how the LLM uses the retrieved context.
+
+Good prompt habits:
+- Tell the LLM explicitly to use the provided context
+- Tell it what to do if the answer isn't in the context (say "I don't know" rather than guess)
+- Keep the format consistent
+
+Example:
+```
+Answer the question using only the context provided.
+If the answer is not in the context, say "I don't have enough information."
+
+Context:
+[chunks]
+
+Question: [user question]
+```
+
+---
+
+**Hallucination**
+
+Even with RAG, hallucination can happen if:
+- The retrieved chunks don't actually contain the answer
+- The LLM blends context with its own training data
+
+Mitigation: instruct the LLM to only use the provided context, and return citations.
+
+---
+
+**Citations**
+
+A great way to build trust. Instead of just returning an answer, return the source chunk too.
+
+```
+Answer: Cosine similarity measures the angle between two vectors.
+Source: embeddings_guide.pdf, page 4
+```
+
+This lets users verify the answer and builds confidence in the system.
 
 ---
 
 ## Step 7 — Mini Project: Ask My Notes
 
-**Status:** 🔲 Not started
+**Status:** ✅ Done
+
+### Build
+
+**The idea**
+
+Take your own notes — markdown files, text files, PDFs — put them into a vector DB, and build a simple interface to ask questions and get answers from your own documents.
+
+---
+
+**What you'll build**
+
+```
+your_notes/
+  rag_notes.md
+  llm_basics.txt
+  embeddings.pdf
+        ↓
+  index all documents
+        ↓
+  vector DB with all your knowledge
+        ↓
+  ask: "explain cosine similarity"
+        ↓
+  answer from your own notes
+```
+
+---
+
+**The code structure**
+
+```
+ask-my-notes/
+  ingest.py      ← reads docs, chunks, embeds, stores in vector DB
+  query.py       ← takes a question, retrieves chunks, calls LLM, returns answer
+  app.py         ← simple CLI or API interface
+```
+
+---
+
+**Tools you'll use**
+
+| Task | Tool |
+|---|---|
+| Embedding | `sentence-transformers` or OpenAI API |
+| Vector DB | ChromaDB (local, no setup) |
+| LLM | OpenAI API or Ollama (local) |
+| PDF parsing | `pdfplumber` |
+| Chunking | manual or `langchain.text_splitter` |
+
+---
+
+**ChromaDB — why it's great for this**
+
+ChromaDB runs completely locally — no server, no account, no cost. Just `pip install chromadb` and start storing vectors. Perfect for a learning project.
+
+---
+
+**What you'll learn by building this**
+
+- How all 6 steps connect in a real system
+- How retrieval quality affects answer quality
+- How to debug when answers are wrong (check what chunks were retrieved)
+- The full RAG loop end to end
+
+---
+
+**Extending it**
+
+Once the basic version works, you can:
+- Add a web UI (simple HTML form + FastAPI backend)
+- Add metadata so you can filter by document name
+- Add citations to show which note the answer came from
+- Swap in different LLMs and compare results
 
 ---
 
