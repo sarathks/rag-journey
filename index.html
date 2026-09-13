@@ -83,46 +83,12 @@
 
     .container { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
-    .progress-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 2.5rem;
-      box-shadow: var(--shadow);
-    }
-
-    .progress-section h2 {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--muted);
-      margin-bottom: 1rem;
-    }
-
-    .steps-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-
-    .step-pill {
-      border-radius: 6px;
-      padding: 0.4rem 0.2rem;
-      text-align: center;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-
-    .step-pill.done { background: var(--green-soft); color: var(--green); border: 1px solid var(--green); }
-    .step-pill.pending { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
-
-    .progress-bar-wrap { margin-top: 1rem; background: var(--border); border-radius: 99px; height: 6px; overflow: hidden; }
-    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a78bfa); border-radius: 99px; }
-    .progress-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; text-align: right; }
-
     .big-picture {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.5rem 2rem;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
       box-shadow: var(--shadow);
     }
 
@@ -151,7 +117,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
       overflow: hidden;
       box-shadow: var(--shadow);
     }
@@ -175,26 +141,18 @@
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+      background: var(--accent-soft); color: var(--accent);
     }
-
-    .step-num.done { background: var(--green-soft); color: var(--green); }
-    .step-num.pending { background: var(--accent-soft); color: var(--accent); }
 
     .step-title { font-weight: 600; font-size: 0.95rem; flex: 1; color: var(--text); }
-
-    .step-badge {
-      font-size: 0.7rem; padding: 0.2rem 0.6rem;
-      border-radius: 99px; font-weight: 600;
-    }
-
-    .step-badge.done { background: var(--green-soft); color: var(--green); }
-    .step-badge.pending { background: var(--accent-soft); color: var(--accent); }
 
     .step-chevron { color: var(--muted); font-size: 0.75rem; transition: transform 0.25s; }
     .step-card.open .step-chevron { transform: rotate(180deg); }
 
     .step-body { display: none; padding: 1.5rem 2rem 2rem; }
     .step-card.open .step-body { display: block; }
+
+    .coming-soon { color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0; }
 
     .concept { margin-bottom: 1.8rem; padding-bottom: 1.8rem; border-bottom: 1px solid var(--border); }
     .concept:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -244,6 +202,8 @@
     .compare-table td { padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--text-soft); }
     .compare-table tr:nth-child(even) td { background: var(--code-bg); }
 
+    .section-label { margin: 2rem 0 1rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+
     .glossary-grid { display: grid; gap: 0.5rem; }
 
     .glossary-item {
@@ -255,14 +215,8 @@
     .glossary-term { font-family: var(--mono); font-size: 0.82rem; color: var(--accent); font-weight: 600; }
     .glossary-def { color: var(--text-soft); font-size: 0.88rem; }
 
-    .coming-soon { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.9rem; }
-    .coming-soon span { font-size: 1.5rem; display: block; margin-bottom: 0.5rem; }
-
-    .section-label { margin: 2.5rem 0 1rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-
     @media (max-width: 640px) {
       .flow-grid { grid-template-columns: 1fr; }
-      .steps-grid { grid-template-columns: repeat(4, 1fr); }
       .glossary-item { grid-template-columns: 1fr; gap: 0.3rem; }
       .step-body { padding: 1.2rem; }
       .theme-toggle span { display: none; }
@@ -278,23 +232,6 @@
 </header>
 
 <div class="container">
-
-  <div class="progress-section">
-    <h2>Progress</h2>
-    <div class="steps-grid">
-      <div class="step-pill done">Step 1</div>
-      <div class="step-pill done">Step 2</div>
-      <div class="step-pill done">Step 3</div>
-      <div class="step-pill pending">Step 4</div>
-      <div class="step-pill pending">Step 5</div>
-      <div class="step-pill pending">Step 6</div>
-      <div class="step-pill pending">Step 7</div>
-    </div>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" style="width: 42%"></div>
-    </div>
-    <div class="progress-label">3 of 7 steps completed</div>
-  </div>
 
   <div class="big-picture">
     <h2>The Big Picture</h2>
@@ -328,9 +265,8 @@
   <!-- Step 1 -->
   <div class="step-card open" id="step1">
     <div class="step-header" onclick="toggle('step1')">
-      <div class="step-num done">1</div>
+      <div class="step-num">1</div>
       <div class="step-title">LLM + RAG Fundamentals</div>
-      <div class="step-badge done">✅ Done</div>
       <div class="step-chevron">▼</div>
     </div>
     <div class="step-body">
@@ -352,7 +288,7 @@
         <h3>Tokens</h3>
         <p>LLMs don't read word by word — they read in tokens. A token is roughly a word or part of a word.</p>
         <ul>
-          <li>"Angular" = 1 token</li>
+          <li>"hello" = 1 token</li>
           <li>"unbelievable" = maybe 3 tokens</li>
           <li>GPT-4 has a ~128k token context window</li>
         </ul>
@@ -391,9 +327,8 @@ User Question
   <!-- Step 2 -->
   <div class="step-card" id="step2">
     <div class="step-header" onclick="toggle('step2')">
-      <div class="step-num done">2</div>
+      <div class="step-num">2</div>
       <div class="step-title">Embeddings</div>
-      <div class="step-badge done">✅ Done</div>
       <div class="step-chevron">▼</div>
     </div>
     <div class="step-body">
@@ -450,9 +385,8 @@ User Question
   <!-- Step 3 -->
   <div class="step-card" id="step3">
     <div class="step-header" onclick="toggle('step3')">
-      <div class="step-num done">3</div>
+      <div class="step-num">3</div>
       <div class="step-title">Vector DB</div>
-      <div class="step-badge done">✅ Done</div>
       <div class="step-chevron">▼</div>
     </div>
     <div class="step-body">
@@ -474,7 +408,7 @@ User Question
       </div>
       <div class="concept">
         <h3>Metadata</h3>
-        <p>Extra info attached to a chunk: source filename, page number, date, category. Lets you filter search results. Example: "search only within documents tagged <code>angular</code>".</p>
+        <p>Extra info attached to a chunk: source filename, page number, date, category. Lets you filter search results.</p>
       </div>
       <div class="concept">
         <h3>Similarity Search</h3>
@@ -482,7 +416,7 @@ User Question
       </div>
       <div class="concept">
         <h3>Top-K</h3>
-        <p>How many results you want back. <code>top_k=3</code> = "give me the 3 most relevant chunks". Tune this based on how much context you want to pass to the LLM.</p>
+        <p>How many results you want back. <code>top_k=3</code> means "give me the 3 most relevant chunks". Tune this based on how much context you want to pass to the LLM.</p>
       </div>
       <div class="build-block">
         <h4>⚙ Build</h4>
@@ -494,45 +428,52 @@ User Question
     </div>
   </div>
 
-  <!-- Steps 4-7 -->
+  <!-- Step 4 -->
   <div class="step-card" id="step4">
     <div class="step-header" onclick="toggle('step4')">
-      <div class="step-num pending">4</div>
+      <div class="step-num">4</div>
       <div class="step-title">Document Processing</div>
-      <div class="step-badge pending">⏳ Coming soon</div>
       <div class="step-chevron">▼</div>
     </div>
-    <div class="step-body"><div class="coming-soon"><span>📄</span>Coming soon.</div></div>
+    <div class="step-body">
+      <div class="coming-soon">Coming soon — PDF → Text → Chunks → Embeddings → Vector DB</div>
+    </div>
   </div>
 
+  <!-- Step 5 -->
   <div class="step-card" id="step5">
     <div class="step-header" onclick="toggle('step5')">
-      <div class="step-num pending">5</div>
-      <div class="step-title">First RAG App 🎉</div>
-      <div class="step-badge pending">⏳ Coming soon</div>
+      <div class="step-num">5</div>
+      <div class="step-title">First RAG App</div>
       <div class="step-chevron">▼</div>
     </div>
-    <div class="step-body"><div class="coming-soon"><span>🚀</span>Coming soon.</div></div>
+    <div class="step-body">
+      <div class="coming-soon">Coming soon — Question → Embedding → Vector search → Chunks → LLM → Answer</div>
+    </div>
   </div>
 
+  <!-- Step 6 -->
   <div class="step-card" id="step6">
     <div class="step-header" onclick="toggle('step6')">
-      <div class="step-num pending">6</div>
+      <div class="step-num">6</div>
       <div class="step-title">Improve RAG</div>
-      <div class="step-badge pending">⏳ Coming soon</div>
       <div class="step-chevron">▼</div>
     </div>
-    <div class="step-body"><div class="coming-soon"><span>🔧</span>Coming soon.</div></div>
+    <div class="step-body">
+      <div class="coming-soon">Coming soon — chunk size, overlap, top-k tuning, metadata filtering, prompt design, citations</div>
+    </div>
   </div>
 
+  <!-- Step 7 -->
   <div class="step-card" id="step7">
     <div class="step-header" onclick="toggle('step7')">
-      <div class="step-num pending">7</div>
+      <div class="step-num">7</div>
       <div class="step-title">Mini Project: Ask My Notes</div>
-      <div class="step-badge pending">⏳ Coming soon</div>
       <div class="step-chevron">▼</div>
     </div>
-    <div class="step-body"><div class="coming-soon"><span>⭐</span>Coming soon.</div></div>
+    <div class="step-body">
+      <div class="coming-soon">Coming soon — put your own notes in, ask questions, get answers from your own documents</div>
+    </div>
   </div>
 
   <h2 class="section-label">Glossary</h2>
@@ -569,7 +510,6 @@ User Question
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
   }
 
-  // Restore saved theme
   const saved = localStorage.getItem('theme');
   if (saved === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
