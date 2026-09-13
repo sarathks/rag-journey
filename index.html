@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAG Learning Journey</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #7c6af7;
+      --accent-soft: #2d2a4a;
+      --green: #22c55e;
+      --muted: #6b7280;
+      --text: #e2e8f0;
+      --text-soft: #94a3b8;
+      --code-bg: #12141e;
+      --font: 'Inter', system-ui, sans-serif;
+      --mono: 'Fira Code', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 0 1.5rem;
+      text-align: center;
+      background: linear-gradient(180deg, #16172b 0%, var(--bg) 100%);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #fff;
+    }
+
+    header h1 span { color: var(--accent); }
+
+    header p {
+      color: var(--text-soft);
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* Progress bar */
+    .progress-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .progress-section h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .step-pill {
+      border-radius: 6px;
+      padding: 0.4rem 0.2rem;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .step-pill:hover { opacity: 0.8; }
+    .step-pill.done { background: #14532d; color: var(--green); border: 1px solid #166534; }
+    .step-pill.pending { background: var(--accent-soft); color: var(--accent); border: 1px solid #3d3870; }
+
+    .progress-bar-wrap {
+      margin-top: 1rem;
+      background: var(--border);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      border-radius: 99px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      text-align: right;
+    }
+
+    /* Big picture */
+    .big-picture {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .big-picture h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.8rem;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .flow-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .flow-box h3 {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .flow-box pre {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    /* Step cards */
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid transparent;
+      transition: background 0.2s;
+    }
+
+    .step-header:hover { background: rgba(124,106,247,0.05); }
+    .step-card.open .step-header { border-bottom-color: var(--border); }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-num.done { background: #14532d; color: var(--green); }
+    .step-num.pending { background: var(--accent-soft); color: var(--accent); }
+
+    .step-title { font-weight: 600; font-size: 1rem; flex: 1; }
+
+    .step-badge {
+      font-size: 0.72rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 99px;
+      font-weight: 600;
+    }
+
+    .step-badge.done { background: #14532d; color: var(--green); }
+    .step-badge.pending { background: var(--accent-soft); color: var(--accent); }
+
+    .step-chevron {
+      color: var(--muted);
+      font-size: 0.8rem;
+      transition: transform 0.25s;
+    }
+
+    .step-card.open .step-chevron { transform: rotate(180deg); }
+
+    .step-body {
+      display: none;
+      padding: 1.5rem 2rem 2rem;
+    }
+
+    .step-card.open .step-body { display: block; }
+
+    /* Concept blocks */
+    .concept {
+      margin-bottom: 1.8rem;
+      padding-bottom: 1.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .concept:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .concept h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.6rem;
+    }
+
+    .concept p { color: var(--text-soft); margin-bottom: 0.5rem; }
+    .concept ul, .concept ol { color: var(--text-soft); padding-left: 1.4rem; margin-bottom: 0.5rem; }
+    .concept li { margin-bottom: 0.2rem; }
+
+    code {
+      font-family: var(--mono);
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #a78bfa;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: #c4b5fd;
+      line-height: 1.7;
+      margin: 0.8rem 0;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    .build-block {
+      background: rgba(34,197,94,0.05);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin-top: 1.2rem;
+    }
+
+    .build-block h4 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--green);
+      margin-bottom: 0.6rem;
+    }
+
+    .build-block pre {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #86efac;
+      margin: 0;
+    }
+
+    /* Comparison table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.8rem 0;
+      font-size: 0.88rem;
+    }
+
+    .compare-table th {
+      background: var(--code-bg);
+      color: var(--muted);
+      font-weight: 600;
+      padding: 0.6rem 1rem;
+      text-align: left;
+      border: 1px solid var(--border);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .compare-table td {
+      padding: 0.6rem 1rem;
+      border: 1px solid var(--border);
+      color: var(--text-soft);
+    }
+
+    .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+    /* Glossary */
+    .glossary-grid {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .glossary-item {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      align-items: start;
+    }
+
+    .glossary-term {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      font-weight: 600;
+      padding-top: 0.1rem;
+    }
+
+    .glossary-def { color: var(--text-soft); font-size: 0.88rem; }
+
+    /* Coming soon */
+    .coming-soon {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .coming-soon span { font-size: 1.5rem; display: block; margin-bottom: 0.5rem; }
+
+    @media (max-width: 640px) {
+      .flow-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: repeat(4, 1fr); }
+      .glossary-item { grid-template-columns: 1fr; gap: 0.3rem; }
+      .step-body { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>RAG <span>Learning Journey</span></h1>
+  <p>From UI developer to building real RAG applications — step by step</p>
+</header>
+
+<div class="container">
+
+  <!-- Progress -->
+  <div class="progress-section">
+    <h2>Progress</h2>
+    <div class="steps-grid">
+      <div class="step-pill done">Step 1</div>
+      <div class="step-pill done">Step 2</div>
+      <div class="step-pill done">Step 3</div>
+      <div class="step-pill pending">Step 4</div>
+      <div class="step-pill pending">Step 5</div>
+      <div class="step-pill pending">Step 6</div>
+      <div class="step-pill pending">Step 7</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" style="width: 42%"></div>
+    </div>
+    <div class="progress-label">3 of 7 steps completed</div>
+  </div>
+
+  <!-- Big Picture -->
+  <div class="big-picture">
+    <h2>The Big Picture</h2>
+    <div class="flow-grid">
+      <div class="flow-box">
+        <h3>You already know</h3>
+        <pre>Frontend
+  ↓ API
+  ↓ Backend
+  ↓ Data</pre>
+      </div>
+      <div class="flow-box">
+        <h3>We're adding</h3>
+        <pre>Angular → API
+  ↓ RAG
+  ↓ Vector DB
+  + LLM</pre>
+      </div>
+      <div class="flow-box">
+        <h3>End goal</h3>
+        <pre>Angular
+  ↓ FastAPI
+  ↓ LangChain
+  ↓ Vector DB
+  ↓ LLM</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-card open" id="step1">
+    <div class="step-header" onclick="toggle('step1')">
+      <div class="step-num done">1</div>
+      <div class="step-title">LLM + RAG Fundamentals</div>
+      <div class="step-badge done">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+
+      <div class="concept">
+        <h3>What is an LLM?</h3>
+        <p>A Large Language Model is a neural network trained on massive amounts of text. It learns patterns in language so well that it can generate new text that sounds coherent and knowledgeable.</p>
+        <p>Examples: GPT-4, Claude, Gemini, LLaMA.</p>
+        <p>It's basically a very sophisticated autocomplete. Given input text, it predicts what should come next — token by token.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Prompt</h3>
+        <p>The input you send to the LLM. Everything you "say" to it is a prompt. The quality of your prompt directly affects the quality of the output. This is why "prompt engineering" became a thing.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Context</h3>
+        <p>The LLM can only "see" a limited window of text at a time — this is its <strong>context window</strong>. Think of it like short-term memory. Everything the model knows about your current conversation has to fit inside this window.</p>
+        <p>This is measured in tokens.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Tokens</h3>
+        <p>LLMs don't read word by word — they read in tokens. A token is roughly a word or part of a word.</p>
+        <ul>
+          <li>"Angular" = 1 token</li>
+          <li>"unbelievable" = maybe 3 tokens</li>
+          <li>GPT-4 has a ~128k token context window</li>
+        </ul>
+        <p>Why it matters: longer context = more expensive + slower.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Hallucination</h3>
+        <p>When an LLM confidently produces something that's factually wrong. It's not lying — it's pattern-matching and sometimes the pattern leads somewhere incorrect.</p>
+        <p>Example: ask it about a real person and it might invent a biography that sounds totally plausible but is wrong. This is a fundamental problem with LLMs.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Why RAG exists</h3>
+        <p>LLMs have two big limitations:</p>
+        <ol>
+          <li>Their knowledge is frozen at training time (no live data)</li>
+          <li>You can't fit an entire knowledge base into the context window</li>
+        </ol>
+        <p>RAG solves both. Instead of hoping the LLM "knows" the answer, you fetch the relevant information first, then give it to the LLM as context.</p>
+      </div>
+
+      <div class="concept">
+        <h3>RAG Architecture</h3>
+<pre>Your Documents
+  ↓ chunked + embedded → stored in Vector DB
+
+User Question
+  ↓ embedded
+  ↓ searched against Vector DB
+  ↓ top matching chunks retrieved
+  ↓ chunks + question sent to LLM as prompt
+  ↓ Answer</pre>
+        <p>The LLM isn't guessing anymore — it's reading the right docs and answering based on them.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-card" id="step2">
+    <div class="step-header" onclick="toggle('step2')">
+      <div class="step-num done">2</div>
+      <div class="step-title">Embeddings</div>
+      <div class="step-badge done">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+
+      <div class="concept">
+        <h3>What is an Embedding?</h3>
+        <p>An embedding is a way to convert text into numbers — specifically, a list of numbers called a vector. The magic is that the numbers capture <em>meaning</em>, not just characters.</p>
+        <p>So "dog" and "puppy" will have vectors that are very close to each other. "dog" and "airplane" will be far apart.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Vector</h3>
+        <p>Just a list of numbers:</p>
+<pre>"dog"      → [0.2,  0.8,  0.1,  0.9,  ...]
+"puppy"    → [0.21, 0.79, 0.12, 0.88, ...]
+"airplane" → [0.9,  0.1,  0.7,  0.2,  ...]</pre>
+        <p>These vectors typically have hundreds or thousands of dimensions. You never read them manually — the math handles comparison.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Semantic Similarity</h3>
+        <p>Keyword search looks for exact word matches. Semantic similarity looks for <em>meaning</em> matches.</p>
+        <ul>
+          <li>Query: "how do I fix a flat tire"</li>
+          <li>Keyword search won't match: "changing a punctured tyre"</li>
+          <li>Semantic search will — because the meaning is the same</li>
+        </ul>
+        <p>This is what makes RAG powerful. You're not matching words, you're matching intent.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Cosine Similarity</h3>
+        <p>The standard way to measure how similar two vectors are. It measures the angle between them, not the distance.</p>
+        <ul>
+          <li><code>1.0</code> = identical meaning</li>
+          <li><code>0.0</code> = completely unrelated</li>
+          <li><code>-1.0</code> = opposite meaning</li>
+        </ul>
+        <p>You don't implement this yourself — every vector DB does it for you.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Why keyword search isn't enough</h3>
+        <table class="compare-table">
+          <thead>
+            <tr><th></th><th>Keyword Search</th><th>Semantic Search</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Matches</td><td>Exact words</td><td>Meaning</td></tr>
+            <tr><td>"car" vs "vehicle"</td><td>❌ no match</td><td>✅ match</td></tr>
+            <tr><td>Typos</td><td>❌ breaks</td><td>✅ usually fine</td></tr>
+            <tr><td>Works for RAG?</td><td>❌ too brittle</td><td>✅ yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="build-block">
+        <h4>⚙ Build</h4>
+        <pre>sentence → embedding → similarity</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-card" id="step3">
+    <div class="step-header" onclick="toggle('step3')">
+      <div class="step-num done">3</div>
+      <div class="step-title">Vector DB</div>
+      <div class="step-badge done">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+
+      <div class="concept">
+        <h3>Vector (in DB context)</h3>
+        <p>Each piece of text you store becomes a vector. The DB stores and indexes these vectors so it can search through millions of them fast.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Collection</h3>
+        <p>Like a table in a regular database — groups related vectors together. You might have a collection for your docs, your notes, your codebase. Each collection holds documents.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Document</h3>
+        <p>One piece of content you've stored — could be a paragraph, a page, a note. Each document has:</p>
+        <ul>
+          <li>the original text (so you can return it to the user)</li>
+          <li>its vector (so you can search it)</li>
+          <li>optional metadata</li>
+        </ul>
+      </div>
+
+      <div class="concept">
+        <h3>Chunk</h3>
+        <p>Documents are often too long to embed as a whole. So you split them into smaller pieces — chunks. Each chunk gets its own embedding and is stored as its own document in the collection.</p>
+        <p>Chunk size matters a lot — we'll go deep on this in Step 6.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Metadata</h3>
+        <p>Extra info you attach to a document/chunk — source filename, page number, date, category. Metadata lets you filter search results.</p>
+        <p>Example: "search only within documents tagged <code>angular</code>".</p>
+      </div>
+
+      <div class="concept">
+        <h3>Similarity Search</h3>
+        <p>When you query a vector DB, you don't write SQL. You pass in a vector (your query embedding) and it finds the stored vectors that are most similar using cosine similarity.</p>
+      </div>
+
+      <div class="concept">
+        <h3>Top-K</h3>
+        <p>The number of results you want back from a similarity search. <code>top_k=3</code> means "give me the 3 most relevant chunks". You tune this based on how much context you want to send to the LLM.</p>
+      </div>
+
+      <div class="build-block">
+        <h4>⚙ Build</h4>
+        <pre>10 sentences
+  ↓ embeddings
+  ↓ vector DB
+  ↓ search</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Steps 4-7 -->
+  <div class="step-card" id="step4">
+    <div class="step-header" onclick="toggle('step4')">
+      <div class="step-num pending">4</div>
+      <div class="step-title">Document Processing</div>
+      <div class="step-badge pending">⏳ Coming soon</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="coming-soon"><span>📄</span>This step is coming soon.</div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step5">
+    <div class="step-header" onclick="toggle('step5')">
+      <div class="step-num pending">5</div>
+      <div class="step-title">First RAG App 🎉</div>
+      <div class="step-badge pending">⏳ Coming soon</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="coming-soon"><span>🚀</span>This step is coming soon.</div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step6">
+    <div class="step-header" onclick="toggle('step6')">
+      <div class="step-num pending">6</div>
+      <div class="step-title">Improve RAG</div>
+      <div class="step-badge pending">⏳ Coming soon</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="coming-soon"><span>🔧</span>This step is coming soon.</div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step7">
+    <div class="step-header" onclick="toggle('step7')">
+      <div class="step-num pending">7</div>
+      <div class="step-title">Mini Project: Ask My Notes</div>
+      <div class="step-badge pending">⏳ Coming soon</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="coming-soon"><span>⭐</span>This step is coming soon.</div>
+    </div>
+  </div>
+
+  <!-- Glossary -->
+  <h2 style="margin: 2.5rem 0 1rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);">Glossary</h2>
+  <div class="glossary-grid">
+    <div class="glossary-item"><div class="glossary-term">LLM</div><div class="glossary-def">Large Language Model — a neural network trained on massive text data that predicts and generates language token by token</div></div>
+    <div class="glossary-item"><div class="glossary-term">Prompt</div><div class="glossary-def">The input/question you send to an LLM</div></div>
+    <div class="glossary-item"><div class="glossary-term">Context Window</div><div class="glossary-def">The limited text an LLM can "see" at once — like short-term memory, measured in tokens</div></div>
+    <div class="glossary-item"><div class="glossary-term">Token</div><div class="glossary-def">The unit LLMs read in — roughly a word or part of a word</div></div>
+    <div class="glossary-item"><div class="glossary-term">Hallucination</div><div class="glossary-def">When an LLM confidently produces factually wrong output</div></div>
+    <div class="glossary-item"><div class="glossary-term">RAG</div><div class="glossary-def">Retrieval-Augmented Generation — fetch relevant docs first, then let the LLM answer based on them</div></div>
+    <div class="glossary-item"><div class="glossary-term">Embedding</div><div class="glossary-def">A list of numbers (vector) that represents the meaning of a piece of text</div></div>
+    <div class="glossary-item"><div class="glossary-term">Vector</div><div class="glossary-def">A list of numbers — the numerical representation of text used for similarity math</div></div>
+    <div class="glossary-item"><div class="glossary-term">Cosine Similarity</div><div class="glossary-def">A measure of the angle between two vectors — closer to 1.0 means more similar meaning</div></div>
+    <div class="glossary-item"><div class="glossary-term">Semantic Similarity</div><div class="glossary-def">Matching by meaning rather than exact words</div></div>
+    <div class="glossary-item"><div class="glossary-term">Chunk</div><div class="glossary-def">A smaller piece of a document — each chunk is embedded and stored separately</div></div>
+    <div class="glossary-item"><div class="glossary-term">Collection</div><div class="glossary-def">A group of related documents/vectors in a vector DB — like a table in SQL</div></div>
+    <div class="glossary-item"><div class="glossary-term">Metadata</div><div class="glossary-def">Extra attributes attached to a chunk (filename, page, category) used for filtering</div></div>
+    <div class="glossary-item"><div class="glossary-term">Similarity Search</div><div class="glossary-def">Querying a vector DB by passing a vector and getting back the closest matches</div></div>
+    <div class="glossary-item"><div class="glossary-term">Top-K</div><div class="glossary-def">How many top results to return from a similarity search</div></div>
+  </div>
+
+</div>
+
+<script>
+  function toggle(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
