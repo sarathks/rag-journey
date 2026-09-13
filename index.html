@@ -436,7 +436,55 @@ User Question
       <div class="step-chevron">▼</div>
     </div>
     <div class="step-body">
-      <div class="coming-soon">Coming soon — PDF → Text → Chunks → Embeddings → Vector DB</div>
+      <div class="concept">
+        <h3>The Pipeline</h3>
+<pre>PDF / TXT / DOCX
+  ↓ extract text
+  ↓ split into chunks
+  ↓ embed each chunk
+  ↓ store in Vector DB</pre>
+        <p>This is the "indexing" side of RAG. You do this once upfront, then your vector DB is ready to search.</p>
+      </div>
+      <div class="concept">
+        <h3>Why you can't just embed the whole document</h3>
+        <p>Embedding models have a token limit (usually 512–8192 tokens). A 50-page PDF won't fit. Even if it did, the embedding would be too vague — it represents the whole document's meaning, not the specific paragraph that answers your question.</p>
+        <p>Smaller chunks = more precise search results.</p>
+      </div>
+      <div class="concept">
+        <h3>Chunking strategies</h3>
+        <p>The simplest: split by character count.</p>
+<pre>chunk_size = 500 characters
+overlap    = 50 characters</pre>
+        <p>Overlap means each chunk shares a bit of text with the next one — prevents losing context at boundaries.</p>
+        <p>Without overlap:</p>
+<pre>chunk 1: "...the model was trained on"
+chunk 2: "large datasets from the web..."</pre>
+        <p>With overlap:</p>
+<pre>chunk 1: "...the model was trained on large"
+chunk 2: "trained on large datasets from the web..."</pre>
+      </div>
+      <div class="concept">
+        <h3>Chunk size tradeoffs</h3>
+        <table class="compare-table">
+          <thead><tr><th>Chunk size</th><th>Good for</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr><td>Small (200–300)</td><td>Precise answers</td><td>May lose context</td></tr>
+            <tr><td>Medium (500–800)</td><td>Most use cases</td><td>Sweet spot</td></tr>
+            <tr><td>Large (1000+)</td><td>Narrative docs</td><td>Less precise retrieval</td></tr>
+          </tbody>
+        </table>
+        <p>No universal right answer — depends on your documents. We'll tune this in Step 6.</p>
+      </div>
+      <div class="concept">
+        <h3>Text extraction</h3>
+        <p>Different document types need different tools:</p>
+        <ul>
+          <li>PDF → <code>PyPDF2</code> or <code>pdfplumber</code></li>
+          <li>DOCX → <code>python-docx</code></li>
+          <li>Plain text → read directly</li>
+        </ul>
+        <p>The output is always the same: a big string of text you then chunk.</p>
+      </div>
     </div>
   </div>
 

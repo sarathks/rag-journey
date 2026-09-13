@@ -258,7 +258,85 @@ The number of results you want back from a similarity search. `top_k=3` means "g
 
 ## Step 4 — Document Processing
 
-**Status:** 🔲 Not started
+**Status:** ✅ Done
+
+### Concepts
+
+**The pipeline**
+
+```
+PDF / TXT / DOCX
+  ↓ extract text
+  ↓ split into chunks
+  ↓ embed each chunk
+  ↓ store in Vector DB
+```
+
+This is the "indexing" side of RAG. You do this once upfront, then your vector DB is ready to search.
+
+---
+
+**Why you can't just embed the whole document**
+
+Embedding models have a token limit (usually 512–8192 tokens). A 50-page PDF won't fit. Even if it did, the embedding would be too vague — it represents the whole document's meaning, not the specific paragraph that answers your question.
+
+Smaller chunks = more precise search results.
+
+---
+
+**Chunking strategies**
+
+The simplest: split by character count.
+
+```
+chunk_size = 500 characters
+overlap    = 50 characters
+```
+
+Overlap means each chunk shares a bit of text with the next one. This prevents losing context at chunk boundaries.
+
+Without overlap:
+```
+chunk 1: "...the model was trained on"
+chunk 2: "large datasets from the web..."
+```
+The sentence is split — both chunks lose meaning.
+
+With overlap:
+```
+chunk 1: "...the model was trained on large"
+chunk 2: "trained on large datasets from the web..."
+```
+Much better.
+
+---
+
+**Overlap**
+
+A safety net. Typically 10–15% of chunk size. If chunk size is 500, overlap is ~50. Every chunk repeats the last 50 characters of the previous one.
+
+---
+
+**Chunk size tradeoffs**
+
+| Chunk size | Good for | Risk |
+|---|---|---|
+| Small (200–300) | Precise answers | May lose context |
+| Medium (500–800) | Most use cases | Sweet spot |
+| Large (1000+) | Narrative docs | Less precise retrieval |
+
+No universal right answer — depends on your documents. We'll tune this in Step 6.
+
+---
+
+**Text extraction**
+
+Different document types need different tools:
+- PDF → `PyPDF2` or `pdfplumber`
+- DOCX → `python-docx`
+- Plain text → read directly
+
+The output is always the same: a big string of text you then chunk.
 
 ---
 
